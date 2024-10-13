@@ -1,11 +1,13 @@
-SIMULATION AND IMPLEMENTATION OF LOGIC GATES
-AIM:
+## SIMULATION AND IMPLEMENTATION OF LOGIC GATES
+
+
+## AIM:
 To design and simulate a 4:1 Multiplexer (MUX) using Verilog HDL in four different modeling styles—Gate-Level, Data Flow, Behavioral, and Structural—and to verify its functionality through a testbench using the Vivado 2023.1 simulation environment. The experiment aims to understand how different abstraction levels in Verilog can be used to describe the same digital logic circuit and analyze their performance.
 
-APPARATUS REQUIRED:
+## APPARATUS REQUIRED:
 Vivado 2023.1
 
-Procedure
+## Procedure
 1. Launch Vivado
 Open Vivado 2023.1 by double-clicking the Vivado icon or searching for it in the Start menu.
 2. Create a New Project
@@ -51,98 +53,112 @@ You can include the timing diagram from the simulation window showing the correc
 10. Close the Simulation
 Once done, close the simulation by going to Simulation → "Close Simulation".
 
-Logic Diagram
+## Logic Diagram
 
 ![image](https://github.com/user-attachments/assets/d4ab4bc3-12b0-44dc-8edb-9d586d8ba856)
 
-Truth Table
+## Truth Table
 
 ![image](https://github.com/user-attachments/assets/c850506c-3f6e-4d6b-8574-939a914b2a5f)
 
-Verilog Code
+## Verilog Code
 
-4:1 MUX Gate-Level Implementation
+## 4:1 MUX Gate-Level Implementation
 
-// mux4_to_1_gate.v
-module mux4_to_1_gate (
-    input wire A,
-    input wire B,
-    input wire C,
-    input wire D,
-    input wire S0,
-    input wire S1,
-    output wire Y
-);
-    wire not_S0, not_S1;
-    wire A_and, B_and, C_and, D_and;
 
-    // Inverters for select lines
-    not (not_S0, S0);
-    not (not_S1, S1);
 
-    // AND gates for each input with select lines
-    and (A_and, A, not_S1, not_S0);
-    and (B_and, B, not_S1, S0);
-    and (C_and, C, S1, not_S0);
-    and (D_and, D, S1, S0);
+module multiplexer(s1,s0,a,b,c,d,y);
 
-    // OR gate to combine all AND gate outputs
-    or (Y, A_and, B_and, C_and, D_and);
+input s1,s0,a,b,c,d;
+
+output y;
+
+wire[3:0]w;
+
+and g1(w[0],~s1,~s0,a);
+
+and g2(w[1],~s1,s0,b);
+
+and g3(w[2],s1,~s0,c);
+
+and g4(w[3],s1,s0,d);
+
+or g5(y,w[0],w[1],w[2],w[3]);
+
+endmodule
+ ## Output
+
+ ![image](https://github.com/user-attachments/assets/d22ab713-20ed-45dc-afe1-932c6b6d57cf)
+
+
+## 4:1 MUX Data Flow Implementation
+
+module mul_data( Y,I0,I1,I2,I3,S0,S1);
+
+output Y;
+
+input I0, I1, I2, I3;
+
+input S0, S1;
+
+assign Y = (~S1 & ~S0 & I0)| (~S1 & S0 & I1) | (S1 & ~S0 & I2) | (S1 & S0 & I3) |
+
 endmodule
 
-4:1 MUX Data Flow Implementation
+## output 
 
-// mux4_to_1_dataflow.v
-module mux4_to_1_dataflow (
-    input wire A,
-    input wire B,
-    input wire C,
-    input wire D,
-    input wire S0,
-    input wire S1,
-    output wire Y
-);
-    assign Y = (~S1 & ~S0 & A) |
-               (~S1 & S0 & B) |
-               (S1 & ~S0 & C) |
-               (S1 & S0 & D);
+![image](https://github.com/user-attachments/assets/e1c62841-6924-4414-8a67-162575861a20)
+
+
+## 4:1 MUX Behavioral Implementation
+
+module mux(s, i, y);
+
+input [1:0] s;
+
+input [3:0] i;
+
+output reg y;
+
+always @(s or i) begin
+
+case (s)
+
+2'b00: y = i[0]; 2'b01: y = i[1]; 2'b10: y = i[2]; 2'b11: y = i[3];
+
+default: y = 1'b0;
+
+endcase
+
+end
+
 endmodule
 
-4:1 MUX Behavioral Implementation
+## output 
 
-// mux4_to_1_behavioral.v
-module mux4_to_1_behavioral (
-    input wire A,
-    input wire B,
-    input wire C,
-    input wire D,
-    input wire S0,
-    input wire S1,
-    output reg Y
-);
-    always @(*) begin
-        case ({S1, S0})
-            2'b00: Y = A;
-            2'b01: Y = B;
-            2'b10: Y = C;
-            2'b11: Y = D;
-            default: Y = 1'bx; // Undefined
-        endcase
-    end
+![image](https://github.com/user-attachments/assets/b6b32f21-0ad1-4a31-a133-e963b86bc66e)
+
+
+## 4:1 MUX Structural Implementation
+
+module mux_4to1 (a,b,c,d,S0,S1,Y);
+
+input a,b,c,d;
+
+input S0, S1;
+
+output Y ;
+
+assign Y = (S1 == 0 && S0 == 0) ? a : (S1 == 0 && S0 == 1) ? b : (S1 == 1 && S0 == 0) ? c : (S1 == 1 && S0 == 1) ? d:
+
 endmodule
 
-4:1 MUX Structural Implementation
+## output 
 
-// mux2_to_1.v
-module mux2_to_1 (
-    input wire A,
-    input wire B,
-    input wire S,
-    output wire Y
-);
-    assign Y = S ? B : A;
-endmodule
+![image](https://github.com/user-attachments/assets/92dfacfa-dd4d-41fa-8e8d-66bff88d7dcc)
 
+
+## Testbench Implementation
 
 // mux4_to_1_structural.v
 module mux4_to_1_structural (
@@ -166,92 +182,87 @@ endmodule
 
 Testbench Implementation
 
-// mux4_to_1_tb.v
-`timescale 1ns / 1ps
+// mux4_to_1_tb.v `timescale 1ns / 1ps
 
-module mux4_to_1_tb;
-    // Inputs
-    reg A;
-    reg B;
-    reg C;
-    reg D;
-    reg S0;
-    reg S1;
+module mux4_to_1_tb; // Inputs reg A; reg B; reg C; reg D; reg S0; reg S1;
 
-    // Outputs
-    wire Y_gate;
-    wire Y_dataflow;
-    wire Y_behavioral;
-    wire Y_structural;
 
-    // Instantiate the Gate-Level MUX
-    mux4_to_1_gate uut_gate (
-        .A(A),
-        .B(B),
-        .C(C),
-        .D(D),
-        .S0(S0),
-        .S1(S1),
-        .Y(Y_gate)
-    );
+// Outputs
+wire Y_gate;
+wire Y_dataflow;
+wire Y_behavioral;
+wire Y_structural;
 
-    // Instantiate the Data Flow MUX
-    mux4_to_1_dataflow uut_dataflow (
-        .A(A),
-        .B(B),
-        .C(C),
-        .D(D),
-        .S0(S0),
-        .S1(S1),
-        .Y(Y_dataflow)
-    );
+// Instantiate the Gate-Level MUX
+mux4_to_1_gate uut_gate (
+    .A(A),
+    .B(B),
+    .C(C),
+    .D(D),
+    .S0(S0),
+    .S1(S1),
+    .Y(Y_gate)
+);
 
-    // Instantiate the Behavioral MUX
-    mux4_to_1_behavioral uut_behavioral (
-        .A(A),
-        .B(B),
-        .C(C),
-        .D(D),
-        .S0(S0),
-        .S1(S1),
-        .Y(Y_behavioral)
-    );
+// Instantiate the Data Flow MUX
+mux4_to_1_dataflow uut_dataflow (
+    .A(A),
+    .B(B),
+    .C(C),
+    .D(D),
+    .S0(S0),
+    .S1(S1),
+    .Y(Y_dataflow)
+);
 
-    // Instantiate the Structural MUX
-    mux4_to_1_structural uut_structural (
-        .A(A),
-        .B(B),
-        .C(C),
-        .D(D),
-        .S0(S0),
-        .S1(S1),
-        .Y(Y_structural)
-    );
+// Instantiate the Behavioral MUX
+mux4_to_1_behavioral uut_behavioral (
+    .A(A),
+    .B(B),
+    .C(C),
+    .D(D),
+    .S0(S0),
+    .S1(S1),
+    .Y(Y_behavioral)
+);
 
-    // Test vectors
-    initial begin
-        // Initialize Inputs
-        A = 0; B = 0; C = 0; D = 0; S0 = 0; S1 = 0;
+// Instantiate the Structural MUX
+mux4_to_1_structural uut_structural (
+    .A(A),
+    .B(B),
+    .C(C),
+    .D(D),
+    .S0(S0),
+    .S1(S1),
+    .Y(Y_structural)
+);
 
-        // Apply test cases
-        #10 {S1, S0, A, B, C, D} = 6'b00_0000; // Y = A = 0
-        #10 {S1, S0, A, B, C, D} = 6'b00_0001; // Y = A = 1
-        #10 {S1, S0, A, B, C, D} = 6'b01_0010; // Y = B = 1
-        #10 {S1, S0, A, B, C, D} = 6'b10_0100; // Y = C = 1
-        #10 {S1, S0, A, B, C, D} = 6'b11_1000; // Y = D = 1
-        #10 {S1, S0, A, B, C, D} = 6'b01_1100; // Y = B = 1
-        #10 {S1, S0, A, B, C, D} = 6'b10_1010; // Y = C = 1
-        #10 {S1, S0, A, B, C, D} = 6'b11_0110; // Y = D = 1
-        #10 {S1, S0, A, B, C, D} = 6'b00_1111; // Y = A = 1
-        #10 $stop;
-    end
+// Test vectors
+initial begin
+    // Initialize Inputs
+    A = 0; B = 0; C = 0; D = 0; S0 = 0; S1 = 0;
 
-    // Monitor the outputs
-    initial begin
-        $monitor("Time=%0t | S1=%b S0=%b | Inputs: A=%b B=%b C=%b D=%b | Y_gate=%b | Y_dataflow=%b | Y_behavioral=%b | Y_structural=%b",
-                 $time, S1, S0, A, B, C, D, Y_gate, Y_dataflow, Y_behavioral, Y_structural);
-    end
+    // Apply test cases
+    #10 {S1, S0, A, B, C, D} = 6'b00_0000; // Y = A = 0
+    #10 {S1, S0, A, B, C, D} = 6'b00_0001; // Y = A = 1
+    #10 {S1, S0, A, B, C, D} = 6'b01_0010; // Y = B = 1
+    #10 {S1, S0, A, B, C, D} = 6'b10_0100; // Y = C = 1
+    #10 {S1, S0, A, B, C, D} = 6'b11_1000; // Y = D = 1
+    #10 {S1, S0, A, B, C, D} = 6'b01_1100; // Y = B = 1
+    #10 {S1, S0, A, B, C, D} = 6'b10_1010; // Y = C = 1
+    #10 {S1, S0, A, B, C, D} = 6'b11_0110; // Y = D = 1
+    #10 {S1, S0, A, B, C, D} = 6'b00_1111; // Y = A = 1
+    #10 $stop;
+end
+
+// Monitor the outputs
+initial begin
+    $monitor("Time=%0t | S1=%b S0=%b | Inputs: A=%b B=%b C=%b D=%b | Y_gate=%b | Y_dataflow=%b | Y_behavioral=%b | Y_structural=%b",
+             $time, S1, S0, A, B, C, D, Y_gate, Y_dataflow, Y_behavioral, Y_structural);
+end
 endmodule
+
+
 
 
 Sample Output
@@ -263,7 +274,7 @@ Time=30 | S1=0 S0=1 | Inputs: A=0 B=0 C=0 D=1 | Y_gate=0 | Y_dataflow=0 | Y_beha
 Time=40 | S1=1 S0=0 | Inputs: A=0 B=0 C=0 D=1 | Y_gate=0 | Y_dataflow=0 | Y_behavioral=0 | Y_structural=0
 ...
 
-Conclusion:
+## Conclusion:
 
 In this experiment, a 4:1 Multiplexer was successfully designed and simulated using Verilog HDL across four different modeling styles: Gate-Level, Data Flow, Behavioral, and Structural. The simulation results verified the correct functionality of the MUX, with all implementations producing identical outputs for the given input conditions.
 
